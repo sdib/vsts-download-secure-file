@@ -22,7 +22,14 @@ restAPI.getTaskAgentApi().downloadSecureFile(tl.getVariable('SYSTEM.TEAMPROJECT'
 		file.pipe(fs.createWriteStream(destFile))
 			.on('finish', () => {
 				console.log(`Wrote secure file to ${destFile}`)
+				tl.setResult(tl.TaskResult.Succeeded, `Secure file available at ${destFile}`)
 			})
-			.on('error', () => console.error(`Unable to write secure file to ${destFile}`))
+			.on('error', (e) => {
+				console.error(`Unable to write secure file to ${destFile}`)
+				tl.setResult(tl.TaskResult.Failed, e.message)
+			})
 	})
-	.catch((e) => console.error(`Unable to download secure file: ${e.message}`))
+	.catch((e) => {
+		console.error(`Unable to download secure file: ${e.message}`)
+		tl.setResult(tl.TaskResult.Failed, e.message)
+	})
