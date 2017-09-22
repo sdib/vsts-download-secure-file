@@ -2,6 +2,7 @@ const tl = require('vsts-task-lib/task');
 const vsts = require('vso-node-api');
 const fs = require('fs');
 const path = require('path');
+const shell = require("shelljs")
 
 const serverUrl = tl.getVariable('System.TeamFoundationCollectionUri');
 const restAPI = new vsts.WebApi(
@@ -19,6 +20,10 @@ console.log(`Downloading secureFileId=${secureFileId} to destFile=${destFile}`)
 
 restAPI.getTaskAgentApi().downloadSecureFile(tl.getVariable('SYSTEM.TEAMPROJECT'), secureFileId, tl.getSecureFileTicket(secureFileId), false)
 	.then((file) => {
+		const destDirectory = path.dirname(destFile)
+		if(!fs.existsSync(destDirectory)) {
+			shell.mkdir('-p', destDirectory)
+		}
 		file.pipe(fs.createWriteStream(destFile))
 			.on('finish', () => {
 				console.log(`Wrote secure file to ${destFile}`)
